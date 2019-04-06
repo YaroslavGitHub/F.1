@@ -1,43 +1,54 @@
+var images = document.getElementsByTagName("img");
 
-window.onload = function(){
-    var isdrag = false;
-    var offsetX = 0;
-    var offsetY = 0;
-    var scale = 1;
-    var j = 0;
 
-    var image = document.querySelectorAll("img");
-    console.log(image);
-   
-    image[j].onmousedown = function(e) {
-        e.preventDefault();
-        isdrag = true;
-        offsetX = e.offsetX + 1;
-        offsetY = e.offsetY + 1;
-        if(!image[j].style.position){
-            image[j].style.position = "absolute";
-            image[j].style.left = e.pageX - offsetX + "px";
-            image[j].style.top = e.pageY - offsetY + "px";
-            image[j].style.transform = `scale(${scale})`;
-        }
-        console.log(image);
+var isdrag = false;
+var coor = {
+    offX: 0,
+    offY: 0
+};
+var scale = 1;
+var obj = {};
+var zindex = 1;
+
+
+document.onmousedown = function(e) {
+    e.preventDefault();
+    for (var i = 0; i < images.length; i++) {
+        images[i].classList.add("image");
+        images[i].style.transform = `scale(1)`;
     }
 
-    image[j].onmouseup = function(e){
-        isdrag = false;
-    }
-    image[j].onwheel = function(e){
-        scale = (e.wheelDelta > 0) ? (scale - 0.05) : (scale + 0.05);
-        scale = scale < 0.2 ? 0.2 : scale;
-        scale = scale > 2 ? 2 : scale;
-        image[j].style.transform = `scale(${scale})`;
-    }
-    document.onmousemove = function(e){
-        if(isdrag){
-            image[j].style.left = e.pageX - offsetX + "px";
-            image[j].style.top = e.pageY - offsetY + "px";
-        }
-    }
+    var image = e.target.closest(".image");
+
+    if (!image) return;
+
+    obj.tag = image;
+    isdrag = true;
+    coor.offX = e.offsetX;
+    coor.offY = e.offsetY;
+    image.style.zIndex = zindex++;
+    image.classList.add("image1");
+}
+
+document.onmouseup = function (e) {
+    isdrag = false;
 }
 
 
+document.onwheel = function (e) {
+    scale = Number(obj.tag.style.transform.substring(6).slice(0, -1));
+    if (e.deltaY < 0) scale += 0.05;
+    if (e.deltaY > 0) scale -= 0.05;
+    obj.tag.style.transform = `scale(${scale})`;
+}
+
+document.onmousemove = function (e) {
+    if (!obj.tag) {
+        return;
+
+    } else if (isdrag) {
+
+        obj.tag.style.left = e.pageX - coor.offX + "px";
+        obj.tag.style.top = e.pageY - coor.offY + "px";
+    }
+}
